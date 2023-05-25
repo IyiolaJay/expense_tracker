@@ -26,7 +26,7 @@ class TransactionList extends StatelessWidget {
                 margin:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                 child: Text(
-                  '\$${transactions[index].amount}',
+                  '\$${transactions[index].amount.toStringAsFixed(2)}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16, color: Colors.purple),
                 ),
@@ -37,8 +37,7 @@ class TransactionList extends StatelessWidget {
                   Text(
                     transactions[index].title,
                     textAlign: TextAlign.left,
-                    style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(DateFormat.yMMMd().format(transactions[index].date),
                       textAlign: TextAlign.left,
