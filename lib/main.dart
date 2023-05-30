@@ -17,15 +17,17 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.purple)
             .copyWith(secondary: Colors.amber),
         textTheme: ThemeData.light().textTheme.copyWith(
+            titleSmall: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
             titleMedium: const TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.w100,
+                fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins')),
         appBarTheme: const AppBarTheme(
           titleTextStyle: TextStyle(
-              fontFamily: 'Quicksand',
-              fontSize: 20,
-              fontWeight: FontWeight.bold),
+              fontFamily: 'Poppins', fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
       home: const MyHomePage(),
@@ -42,19 +44,25 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _userTransactions = [
-    Transaction(
-      id: 't1',
-      title: 'Miscellaneous',
-      amount: 67.23,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: 't2',
-      title: 'Food',
-      amount: 34.66,
-      date: DateTime.now(),
-    ),
+    //   Transaction(
+    //     id: 't1',
+    //     title: 'Miscellaneous',
+    //     amount: 67.23,
+    //     date: DateTime.now(),
+    //   ),
+    //   Transaction(
+    //     id: 't2',
+    //     title: 'Food',
+    //     amount: 34.66,
+    //     date: DateTime.now(),
+    //   ),
   ];
+
+  List<Transaction> get _recentTransactions {
+    return _userTransactions.where((tx) {
+      return tx.date.isAfter(DateTime.now().subtract(const Duration(days: 7)));
+    }).toList();
+  }
 
   void _addNewTransaction(String inputTitle, double inputAmount) {
     final newTx = Transaction(
