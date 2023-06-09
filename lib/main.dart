@@ -1,9 +1,16 @@
+import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
 import './widgets/transaction_list.dart';
 import './widgets/new_transaction.dart';
-import 'package:flutter/material.dart';
 import './models/transactions.dart';
+import './widgets/chart.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations(
+  //     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -20,6 +27,14 @@ class MyApp extends StatelessWidget {
             titleSmall: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
+            ),
+            bodyMedium: const TextStyle(
+              fontSize: 16,
+            ),
+            labelLarge: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
             ),
             titleMedium: const TextStyle(
                 fontSize: 16,
@@ -64,12 +79,13 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
-  void _addNewTransaction(String inputTitle, double inputAmount) {
+  void _addNewTransaction(
+      String inputTitle, double inputAmount, DateTime selectedDate) {
     final newTx = Transaction(
         id: DateTime.now().toString(),
         title: inputTitle,
         amount: inputAmount,
-        date: DateTime.now());
+        date: selectedDate);
 
     setState(() {
       _userTransactions.add(newTx);
@@ -85,6 +101,12 @@ class _MyHomePageState extends State<MyHomePage> {
               behavior: HitTestBehavior.opaque,
               child: NewTransaction(addTx: _addNewTransaction));
         });
+  }
+
+  void _deleteTransaction(String id) {
+    setState(() {
+      _userTransactions.removeWhere((tx) => tx.id == id);
+    });
   }
 
   @override
@@ -104,15 +126,21 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              width: double.infinity,
-              child: const Card(
-                color: Colors.blue,
-                elevation: 5,
-                child: Text('Chart'),
-              ),
+            SizedBox(
+                height: (MediaQuery.of(context).size.height -
+                        AppBar().preferredSize.height -
+                        MediaQuery.of(context).padding.top) *
+                    0.3,
+                child: Chart(recentTransactions: _recentTransactions)),
+            SizedBox(
+              height: (MediaQuery.of(context).size.height -
+                      AppBar().preferredSize.height -
+                      MediaQuery.of(context).padding.top) *
+                  0.7,
+              child: TransactionList(
+                  transactions: _userTransactions,
+                  deleteTx: _deleteTransaction),
             ),
-            TransactionList(transactions: _userTransactions),
           ],
         ),
       ),
