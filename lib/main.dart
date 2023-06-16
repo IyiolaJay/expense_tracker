@@ -21,7 +21,8 @@ class MyApp extends StatelessWidget {
       title: 'Expense Tracker',
       theme: ThemeData(
         fontFamily: 'Quicksand',
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.purple)
+        colorScheme: ColorScheme.fromSwatch(
+                primarySwatch: Colors.purple, accentColor: Colors.amber)
             .copyWith(secondary: Colors.amber),
         textTheme: ThemeData.light().textTheme.copyWith(
             titleSmall: const TextStyle(
@@ -73,6 +74,8 @@ class _MyHomePageState extends State<MyHomePage> {
     //   ),
   ];
 
+  bool _showChart = false;
+
   List<Transaction> get _recentTransactions {
     return _userTransactions.where((tx) {
       return tx.date.isAfter(DateTime.now().subtract(const Duration(days: 7)));
@@ -111,6 +114,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape =
+        mediaQuery.orientation == Orientation.landscape;
+    final txListWidget = SizedBox(
+      height: (mediaQuery.size.height -
+              AppBar().preferredSize.height -
+              mediaQuery.padding.top) *
+          0.7,
+      child: TransactionList(
+          transactions: _userTransactions, deleteTx: _deleteTransaction),
+    );
     return Scaffold(
       appBar: AppBar(
         title: const Text('Expenses'),
@@ -126,21 +140,37 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(
-                height: (MediaQuery.of(context).size.height -
-                        AppBar().preferredSize.height -
-                        MediaQuery.of(context).padding.top) *
-                    0.3,
-                child: Chart(recentTransactions: _recentTransactions)),
-            SizedBox(
-              height: (MediaQuery.of(context).size.height -
-                      AppBar().preferredSize.height -
-                      MediaQuery.of(context).padding.top) *
-                  0.7,
-              child: TransactionList(
-                  transactions: _userTransactions,
-                  deleteTx: _deleteTransaction),
-            ),
+            if (isLandscape)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Show Chat'),
+                  Switch(
+                      value: _showChart,
+                      onChanged: (val) {
+                        setState(() {
+                          _showChart = val;
+                        });
+                      }),
+                ],
+              ),
+            if (!isLandscape)
+              SizedBox(
+                  height: (mediaQuery.size.height -
+                          AppBar().preferredSize.height -
+                          mediaQuery.padding.top) *
+                      0.3,
+                  child: Chart(recentTransactions: _recentTransactions)),
+            if (!isLandscape) txListWidget,
+            if (isLandscape)
+              _showChart
+                  ? SizedBox(
+                      height: (mediaQuery.size.height -
+                              AppBar().preferredSize.height -
+                              mediaQuery.padding.top) *
+                          0.7,
+                      child: Chart(recentTransactions: _recentTransactions))
+                  : txListWidget
           ],
         ),
       ),
