@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+
 // import 'package:flutter/services.dart';
 import './widgets/transaction_list.dart';
 import './widgets/new_transaction.dart';
@@ -112,11 +115,73 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  List<Widget> _buildLandscapeContent(
+      MediaQueryData mediaQuery, PreferredSizeWidget appBar, Widget txList) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('Show Chat'),
+          Switch.adaptive(
+              value: _showChart,
+              onChanged: (val) {
+                setState(() {
+                  _showChart = val;
+                });
+              }),
+        ],
+      ),
+      _showChart
+          ? SizedBox(
+              height: (mediaQuery.size.height -
+                      appBar.preferredSize.height -
+                      mediaQuery.padding.top) *
+                  0.7,
+              child: Chart(recentTransactions: _recentTransactions))
+          : txList
+    ];
+  }
+
+  List<Widget> _buildPortraitContent(
+      MediaQueryData mediaQuery, PreferredSizeWidget appBar, Widget txList) {
+    return [
+      SizedBox(
+          height: (mediaQuery.size.height -
+                  appBar.preferredSize.height -
+                  mediaQuery.padding.top) *
+              0.3,
+          child: Chart(recentTransactions: _recentTransactions)),
+      txList
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: const Text('Expenses'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  child: const Icon(CupertinoIcons.add),
+                  onTap: () => {_openAddTransactionForm(context)},
+                )
+              ],
+            ))
+        : AppBar(
+            title: const Text('Expenses'),
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    _openAddTransactionForm(context);
+                  },
+                  icon: const Icon(Icons.add))
+            ],
+          ) as PreferredSizeWidget;
+
     final mediaQuery = MediaQuery.of(context);
-    final isLandscape =
-        mediaQuery.orientation == Orientation.landscape;
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final txListWidget = SizedBox(
       height: (mediaQuery.size.height -
               AppBar().preferredSize.height -
@@ -125,63 +190,34 @@ class _MyHomePageState extends State<MyHomePage> {
       child: TransactionList(
           transactions: _userTransactions, deleteTx: _deleteTransaction),
     );
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Expenses'),
-        actions: [
-          IconButton(
-              onPressed: () {
-                _openAddTransactionForm(context);
-              },
-              icon: const Icon(Icons.add))
-        ],
-      ),
-      body: SingleChildScrollView(
+
+    //Body contents
+    final pageBody = SafeArea(
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (isLandscape)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Show Chat'),
-                  Switch(
-                      value: _showChart,
-                      onChanged: (val) {
-                        setState(() {
-                          _showChart = val;
-                        });
-                      }),
-                ],
-              ),
+              ..._buildLandscapeContent(mediaQuery, appBar, txListWidget),
             if (!isLandscape)
-              SizedBox(
-                  height: (mediaQuery.size.height -
-                          AppBar().preferredSize.height -
-                          mediaQuery.padding.top) *
-                      0.3,
-                  child: Chart(recentTransactions: _recentTransactions)),
-            if (!isLandscape) txListWidget,
-            if (isLandscape)
-              _showChart
-                  ? SizedBox(
-                      height: (mediaQuery.size.height -
-                              AppBar().preferredSize.height -
-                              mediaQuery.padding.top) *
-                          0.7,
-                      child: Chart(recentTransactions: _recentTransactions))
-                  : txListWidget
+              ..._buildPortraitContent(mediaQuery, appBar, txListWidget)
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            _openAddTransactionForm(context);
-          },
-          child: const Icon(
-            Icons.add,
-            color: Colors.black,
-          )),
+    );
+    return Scaffold(
+      appBar: appBar,
+      body: pageBody,
+      floatingActionButton: Platform.isIOS
+          ? Container()
+          : FloatingActionButton(
+              onPressed: () {
+                _openAddTransactionForm(context);
+              },
+              child: const Icon(
+                Icons.add,
+                color: Colors.black,
+              )),
     );
   }
 }

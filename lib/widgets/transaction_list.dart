@@ -1,6 +1,7 @@
 import '../models/transactions.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
+import './Transaction_item.dart';
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactions;
@@ -34,45 +35,7 @@ class TransactionList extends StatelessWidget {
           : ListView.builder(
               itemCount: transactions.length,
               itemBuilder: (ctx, index) {
-                return Card(
-                  elevation: 3,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                        radius: 20,
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: FittedBox(
-                            child: Text(
-                              '\$ ${transactions[index].amount}',
-                            ),
-                          ),
-                        )),
-                    title: Text(
-                      transactions[index].title,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    subtitle: Text(
-                      DateFormat.yMMMd().format(transactions[index].date),
-                    ),
-                    trailing: MediaQuery.of(context).size.width > 426
-                        ? TextButton.icon(
-                            onPressed: () {
-                              deleteTx(transactions[index].id);
-                            },
-                            icon: const Icon(Icons.delete),
-                            label: const Text('Delete'))
-                        : IconButton(
-                            color: Theme.of(context).colorScheme.error,
-                            onPressed: () {
-                              deleteTx(transactions[index].id);
-                            },
-                            icon: const Icon(
-                              Icons.delete,
-                            )),
-                  ),
-                );
+                return TransactionItem(transactions: transactions[index], deleteTx: deleteTx);
                 // Card(
                 //   elevation: 6,
                 //   child: Row(children: <Widget>[
@@ -115,3 +78,5 @@ class TransactionList extends StatelessWidget {
     );
   }
 }
+
+
